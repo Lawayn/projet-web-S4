@@ -9,6 +9,7 @@
     "preview": "vite preview"
   },
   "dependencies": {
+    "@fontsource/bilbo": "^5.0.12",
     "vue": "^3.3.11"
   },
   "devDependencies": {
