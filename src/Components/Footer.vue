@@ -11,14 +11,49 @@
 </script>
 
 <style>
+
+footer{
+    position: fixed;
+    left: 50%;
+    transform: translateX(-50%);
+}
+
+footer p{
+    color: #132F2A;
+    font-family: "Roboto", sans-serif;
+    font-weight: 400;
+    font-style: normal;
+}
+
+@media only screen and (max-width: 600px) {
     footer{
-        position: fixed;
-        bottom: 2vw;
-        left: 50%;
-        transform: translateX(-50%);
-    }
+        bottom: 5vw;
+    } 
+
     footer p{
-        color: #132F2A;
+        font-size: 16px;
+    }
+}
+
+@media only screen and (min-width: 601px) and (max-width: 1024px) {
+    footer{
+        bottom: 3vw;
+    } 
+
+    footer p{
+        font-size: 18px;
+    }
+}
+
+@media only screen and (min-width: 1025px) {
+    footer{
+        bottom: 1vw;
+    } 
+
+
+    footer p{
         font-size: 20px;
     }
+}
+
 </style>

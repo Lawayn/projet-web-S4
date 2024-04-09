@@ -1,4 +1,3 @@
-// Fonction pour récupérer les citation
 export async function selectQuotes() {
     const myHeaders = new Headers();
     myHeaders.append("Authorization", "Bearer qPe6R8rbWTW7Yy4rpai0");
@@ -14,7 +13,6 @@ export async function selectQuotes() {
     return responseData.docs;
 }
 
-// Fonction pour récupérer les films
 export async function selectMovies() {
     const myHeaders = new Headers();
     myHeaders.append("Authorization", "Bearer qPe6R8rbWTW7Yy4rpai0");
@@ -30,7 +28,6 @@ export async function selectMovies() {
     return responseData.docs;
 }
 
-// Fonction pour récupérer un personnage spécifique
 export async function selectOneCharacter(characterID) {
     const myHeaders = new Headers();
     myHeaders.append("Authorization", "Bearer qPe6R8rbWTW7Yy4rpai0");
@@ -51,7 +48,6 @@ export async function selectOneCharacter(characterID) {
     }
 }
 
-// Fonction pour sélectionner des personnages aléatoires
 export async function selectRandomCharacters(numCharacters) {
     const myHeaders = new Headers();
     myHeaders.append("Authorization", "Bearer qPe6R8rbWTW7Yy4rpai0");
@@ -72,6 +68,5 @@ export async function selectRandomCharacters(numCharacters) {
         randomCharacters.push(characters[randomIndex]);
         characters.splice(randomIndex, 1);
     }
-
     return randomCharacters;
 }

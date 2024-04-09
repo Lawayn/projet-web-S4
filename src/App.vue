@@ -1,7 +1,7 @@
 <template>
   <div>
     <Header/>
-    <Main :randomQuote="randomQuote" :goodAnswer="goodAnswer" :allAnswers="allAnswers" :movies="movies" :selectedMovie="selectedMovie" :selectMovie="selectMovie"/>
+    <Main :randomQuote="randomQuote" :goodAnswer="goodAnswer" :allAnswers="allAnswers" :movies="movies" :selectedMovieID="selectedMovieID" :selectMovie="selectMovie" :setCookie="setCookie" :getCookie="getCookie"/>
     <Footer/>
   </div>
 </template>
@@ -21,85 +21,79 @@ export default {
       wrongAnswers: null,
       goodAnswer: null,
       allAnswers: null,
-      character: [],
-      characterID: null,
       characterName: null,
-      randomCharacters: [],
       movies: [],
-      movieName: null,
-      selectedMovie: null // Nouvelle propriété pour stocker le film sélectionné
+      selectedMovie: null,
+      selectedMovieID: null
     };
   },
-  async created() {
-    //const wrongAnswers = await getWrongAnswer()
-    //const questionContent = await getQuestion()
-    //this.question = questionContent.question
-    //this.goodAnswer = questionContent.answer
-    //let allAnswers = [...wrongAnswer, goodAnswer]
-    //this.allAnswers = shuffle(allAnswers)
-
-    // if (selectedAnswer == this.goodAnswer)
-    // else 
-
-    
+  async created() {  
+    this.selectedMovieID = this.getCookie('selectedMovieId');
     selectRandomCharacters(3).then(randomCharacters => {
       this.wrongAnswers = randomCharacters;
     });
     await this.showQuotes();
-    this.showMovies();
+    await this.showMovies();
     
+    if (this.selectedMovieID) {
+      const selectedMovie = this.movies.find(movie => movie._id === this.selectedMovieID);
+      if (selectedMovie) {
+        this.selectedMovie = selectedMovie;
+        this.filterQuotesByMovie();
+      }
+    } else {
+      this.selectedMovie = this.movies[0];
+      this.filterQuotesByMovie();
+    }
   },
   computed: {
-      shuffledCharacters() {
-          // Créer une copie des personnages aléatoire
-          const shuffled = [...this.randomCharacters];
-          // Utiliser l'algorithme de Fisher-Yates pour mélanger les personnages
-          for (let i = shuffled.length - 1; i > 0; i--) {
-              const j = Math.floor(Math.random() * (i + 1));
-              [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
-          }
-          return shuffled;
+    shuffledCharacters() {
+      const shuffled = [...this.wrongAnswers];
+      for (let i = shuffled.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
       }
+      return shuffled;
+    }
   },
   methods: {
     async showMovies() {
       this.movies = await selectMovies();
 
-      // Filtrer les films pour lesquels des citations existent
       this.movies = this.movies.filter(movie => {
         return this.quotes.some(quote => quote.movie === movie._id);
       });
+      if (this.selectedMovieID) {
+        const selectedMovie = this.movies.find(movie => movie._id === this.selectedMovieID);
+        if (selectedMovie) {
+          this.selectedMovie = selectedMovie;
+        }
+      }
     },
     async showQuotes() {
       this.quotes = await selectQuotes();
       this.filterQuotesByMovie();
     },
     async filterQuotesByMovie() {
-      if (this.selectedMovie) {
-          // Filtrer les citations pour le film sélectionné
-          const filteredQuotes = this.quotes.filter(quote => quote.movie === this.selectedMovie._id);
-          if (filteredQuotes.length > 0) {
-              // Sélectionner une citation aléatoire parmi les citations filtrées
-              const randomIndex = Math.floor(Math.random() * filteredQuotes.length);
-              this.randomQuote = filteredQuotes[randomIndex].dialog;
-              const characterID = filteredQuotes[randomIndex].character;
-              if (characterID) {
-                  // Attendre que la promesse soit résolue pour obtenir les données du personnage
-                  this.goodAnswer = await selectOneCharacter(characterID);
-                  if (this.goodAnswer) {
-                      this.allAnswers = [...this.wrongAnswers, this.goodAnswer];
-                      this.allAnswers = this.shuffleArray(this.allAnswers);
-                  }
-              }
-          } else {
-              // Aucune citation trouvée pour le film sélectionné
-              this.randomQuote = "Aucune citation trouvée pour ce film.";
-              this.characterName = null;
+      if (!this.selectedMovieID) {
+        this.randomQuote = "Please select a movie.";
+        return;
+      }
+
+      const filteredQuotes = this.quotes.filter(quote => quote.movie === this.selectedMovieID);
+      if (filteredQuotes.length > 0) {
+        const randomIndex = Math.floor(Math.random() * filteredQuotes.length);
+        this.randomQuote = filteredQuotes[randomIndex].dialog;
+        const characterID = filteredQuotes[randomIndex].character;
+        if (characterID) {
+          this.goodAnswer = await selectOneCharacter(characterID);
+          if (this.goodAnswer) {
+            this.allAnswers = [...this.wrongAnswers, this.goodAnswer];
+            this.allAnswers = this.shuffleArray(this.allAnswers);
           }
+        }
       } else {
-          // Aucun film sélectionné, afficher un message par défaut
-          this.randomQuote = "Please select a movie.";
-          this.characterName = null;
+        this.randomQuote = "No quotes found for this film.";
       }
     },
     async showOneCharacter(characterID) {
@@ -107,22 +101,42 @@ export default {
       if (character) {
         this.characterName = character.name;
       } else {
-        console.log("Aucun personnage trouvé avec l'ID spécifié :", characterID);
+        console.log("No characters found with the specified ID  :", characterID);
       }
     },
     selectMovie(movie) {
-      // Mettre à jour le film sélectionné et filtrer les citations
       this.selectedMovie = movie;
+      this.selectedMovieID = movie._id;
       this.filterQuotesByMovie();
+      this.setCookie("selectedMovieId", movie._id, 365);
     },
     shuffleArray(array) {
-      // Implémentation de l'algorithme de Fisher-Yates pour mélanger un tableau
       for (let i = array.length - 1; i > 0; i--) {
-          const j = Math.floor(Math.random() * (i + 1));
-          [array[i], array[j]] = [array[j], array[i]];
+        const j = Math.floor(Math.random() * (i + 1));
+        [array[i], array[j]] = [array[j], array[i]];
       }
       return array;
-   }
+    },
+    setCookie(name, value, days) {
+      const date = new Date();
+      date.setTime(date.getTime() + (days * 24 * 60 * 60 * 1000));
+      const expires = "expires=" + date.toUTCString();
+      document.cookie = name + "=" + value + ";" + expires + ";path=/";
+    },
+    getCookie(name) {
+      const decodedCookie = decodeURIComponent(document.cookie);
+      const cookies = decodedCookie.split(';');
+      for (let i = 0; i < cookies.length; i++) {
+          let cookie = cookies[i];
+          while (cookie.charAt(0) === ' ') {
+              cookie = cookie.substring(1);
+          }
+          if (cookie.indexOf(name) === 0) {
+              return cookie.substring(name.length + 1, cookie.length);
+          }
+      }
+      return null;
+    }
   },
   components : {
     Header,
@@ -133,26 +147,42 @@ export default {
 </script>
 
 <style>
-  body{
-      background-color: #486753;
-  }
 
+body{
+  background-color: #486753;
+}
+
+p {
+  text-align: center;
+}
+
+#app {
+  display : block;
+  max-width: 100vw;
+  width: 100%;
+  text-align: center;
+}
+
+@media only screen and (max-width: 600px) {
   #app{
-    position: fixed;
-    top : 0;
-    left: 50%;
-    width: 100%;
-    height: 100%;
-    text-align: center;
-    transform: translateX(-50%);
-    display: block;
-    display: block;
+    margin-top: 5vw;
+    margin-bottom: 5vw;
+  }
+}
+
+@media only screen and (min-width: 601px) and (max-width: 1024px) {
+  #app{
+    margin-top: 3vw;
+    margin-bottom: 3vw;
+  }
+}
+
+@media only screen and (min-width: 1025px) {
+  #app{
     margin-top: 2vw;
     margin-bottom: 2vw;
   }
+  
+}
 
-  p {
-    text-align: center; 
-    font-size: 50px;
-  }
 </style>
