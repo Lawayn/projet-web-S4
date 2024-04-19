@@ -16,10 +16,10 @@
                 {{ character.name }}
             </div>
         </div>
-        <div v-if="guessResult === true">
+        <div v-if="guessResult === true" class="result">
             <p>Well done !</p>
         </div>
-        <div v-if="guessResult === false">
+        <div v-if="guessResult === false" class="result">
             <p>Try again...</p>
         </div>
         <div class="score">
@@ -142,6 +142,17 @@ h3{
     font-style: normal;
 }
 
+.result{
+    position: absolute;
+    color: #295647;
+    font-family: "Roboto", sans-serif;
+    font-weight: 400;
+    font-style: normal;
+    background-color: #BFB2B2;
+    border-radius: 15px;
+    padding: 2vw;
+}
+
 .score{
     position: absolute;
     color: #132F2A;
@@ -181,6 +192,12 @@ h3{
         width: 50vw;
         height: 50vw;
         font-size: 22px;
+    }
+
+    .result{
+        top : 50vh;
+        left : 25vw;
+        font-size: 30px;
     }
 
     .score{
@@ -223,6 +240,12 @@ h3{
         font-size: 28px;
     }
 
+    .result{
+        top : 50vh;
+        left : 38vw;
+        font-size: 30px;
+    }
+
     .score{
         top: 20px;
         left : 5vw;
@@ -261,6 +284,12 @@ h3{
         width: 12vw;
         height: 12vw;
         font-size: 32px;
+    }
+
+    .result{
+        top : 50vh;
+        left : 45vw;
+        font-size: 40px;
     }
 
     .score{
